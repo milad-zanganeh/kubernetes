@@ -1,0 +1,39 @@
+{{- define "mylib.deployment" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mylib.fullname" . }}
+  labels:
+    {{- include "mylib.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount | default 2 }}
+  selector:
+    matchLabels:
+      app: {{ include "mylib.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "mylib.name" . }}
+    spec:
+      containers:
+        - name: {{ include "mylib.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
+          ports:
+            - containerPort: {{ .Values.containerPort | default 8080 }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.containerPort | default 8080 }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.containerPort | default 8080 }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+{{- end -}}
+
