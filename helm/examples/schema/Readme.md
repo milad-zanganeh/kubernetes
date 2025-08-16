@@ -12,15 +12,15 @@ This chart demonstrates Helm's schema validation feature using a `values.schema.
 
 ## Usage
 
-Generate templates:
+Render the chart templates without errors:
 
 ```bash
-helm template my-release ./schema
+helm template my-release .
 ```
 
-## Schema Validation Example
-
-This will cause a validation error due to invalid image tag format:
+Example: Validation Error
+If you provide an invalid value, Helm will fail validation.
+For instance, this will raise an error due to an invalid image tag format:
 
 ```bash
 helm template my-release . --set image.tag=latest
