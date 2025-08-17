@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "hooks.fullname" . }}-preinstall
+  labels:
+    {{- include "hooks.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        {{- include "hooks.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: preinstall
+          image: {{ .Values.hooks.image }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "[HOOK] Running pre-install/upgrade tasks for {{ include "hooks.fullname" . }}";
+              # Example: create schema, warm cache, etc
+              sleep 10;
+              echo "[HOOK] Done." 

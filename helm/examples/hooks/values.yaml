@@ -1,0 +1,12 @@
+replicaCount: 1
+
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+app:
+  containerPort: 80
+
+hooks:
+  image: busybox:1.36 

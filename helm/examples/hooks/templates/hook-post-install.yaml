@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "hooks.fullname" . }}-postinstall
+  labels:
+    {{- include "hooks.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        {{- include "hooks.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: postinstall
+          image: {{ .Values.hooks.image }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "[HOOK] Post-install tasks for {{ include "hooks.fullname" . }}";
+              sleep 10;
+              echo "[HOOK] Post-install complete." 

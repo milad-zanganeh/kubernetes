@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "hooks.fullname" . }}-predelete
+  labels:
+    {{- include "hooks.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        {{- include "hooks.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: predelete
+          image: {{ .Values.hooks.image }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "[HOOK] Cleaning up external resources before delete for {{ include "hooks.fullname" . }}";
+              sleep 10;
+              echo "[HOOK] Cleanup complete." 
