@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "hooks.fullname" . }}-test
+  labels:
+    {{- include "hooks.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  restartPolicy: Never
+  containers:
+    - name: test
+      image: {{ .Values.hooks.image }}
+      command:
+        - sh
+        - -c
+        - |
+          set -eu
+          echo "[HOOK] Waiting for service {{ include "hooks.fullname" . }} to become ready...";
+          wget -qO- http://{{ include "hooks.fullname" . }}:{{ .Values.service.port }} > /tmp/index.html 2>/dev/null; do
+          echo "[HOOK] Service responded, validating content...";
+          if grep -qi "Welcome to nginx" /tmp/index.html; then
+            echo "[HOOK] OK: nginx welcome page detected.";
+            sleep 10
+            exit 0
+          else
+            echo "[HOOK] ERROR: Unexpected content:";
+            head -n 20 /tmp/index.html || true
+            sleep 10
+            exit 1
+          fi 
