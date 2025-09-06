@@ -1,0 +1,43 @@
+Vagrant.configure("2") do |config|
+  BOX_NAME = "generic/debian12"
+  config.ssh.insert_key = false
+  config.vm.provision "file",
+    source: "~/.ssh/id_vagrant.pub",
+    destination: "/home/vagrant/.ssh/authorized_keys"
+
+  config.vm.provider :libvirt do |lv|
+    lv.uri    = "qemu:///system"
+    lv.memory = 4098
+    lv.cpus   = 4
+    lv.storage_pool_name = "vagrant_pool"
+    lv.storage :file, :size => '20G', :type => 'raw', :bus => 'virtio'
+    lv.nic_model_type = "virtio"
+  end
+
+  nodes = {
+    "dev-kubernetes-1" => "10.10.8.11",
+    "dev-kubernetes-2" => "10.10.8.12",
+    "dev-kubernetes-3" => "10.10.8.13",
+  }
+
+  nodes.each do |name, ip|
+    config.vm.define name do |node|
+      node.vm.box = BOX_NAME
+      node.vm.hostname = name
+      node.vm.provision "shell", inline: <<-SHELL
+      export DEBIAN_FRONTEND=noninteractive
+      echo "nameserver 1.1.1.1" > /etc/resolv.conf
+      apt-get update -y
+      apt-get upgrade -y
+      apt-get autoremove -y
+    SHELL
+      node.vm.network "private_network",
+                      ip: ip,
+                      libvirt__network_name: "vagrant-10-10.8"
+
+      node.vm.synced_folder ".", "/vagrant",
+                             type: "rsync",
+                             rsync__exclude: [".git/", ".vagrant/"]
+    end
+  end
+end
