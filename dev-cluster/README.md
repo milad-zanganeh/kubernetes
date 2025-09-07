@@ -4,14 +4,11 @@ This project provisions a 3-node Kubernetes cluster on your local machine using 
 
 ### Prerequisites
 
-- Linux host with KVM enabled
+- Linux host with KVM+Vagrant enabled
   - Verify: `egrep -c '(vmx|svm)' /proc/cpuinfo` should be > 0
-  - User in `libvirt` and `kvm` groups (re-login after adding)
   - Install/config guide: [infra-misc vagrant](https://github.com/milad-zanganeh/infra-misc/tree/master/vagrant)
 - Packages:
-  - `vagrant` and `vagrant-libvirt` plugin
-  - `qemu-kvm`, `libvirt-daemon-system`, `libvirt-clients`, `virt-manager`
-  - `docker` or another OCI-compatible runtime to run the Kubespray container
+  - `docker` to run the Kubespray container ([Install Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/))
   - `make`
 - SSH key pair for Vagrant nodes:
   - Private: `~/.ssh/id_vagrant`
@@ -90,7 +87,7 @@ ansible-playbook -i /inventory/k8s_cluster/inventory.ini cluster.yml
 
 ```bash
 make nodes-status
-make login                 # SSH into dev-kubernetes-1
+make login                 # SSH into dev-kubernetes-1 (Password : vagrant)
 make nodes-ssh-dev-kubernetes-2
 ```
 
