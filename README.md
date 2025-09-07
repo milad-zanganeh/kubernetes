@@ -1,4 +1,4 @@
-# Kubernetes Helm Examples
+# Kubernetes
 
 This repository contains Kubernetes Helm chart examples and a local development environment.
 
